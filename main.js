@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const { authGuard, generateToken } = require('./authentication');
+const { initSender, sendConfirmationEmail } = require('./email')
 
 const app = express();
 require('dotenv').config();
@@ -15,8 +16,9 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(authGuard);
 
-app.listen(3000, () => {
-  console.log('Listening on port 3000');
+app.listen(process.env.SERVER_PORT, () => {
+  initSender(process.env.SENDGRID_KEY);
+  console.log('Listening on port ', process.env.SERVER_PORT);
 })
 
 const users = [];
@@ -44,7 +46,7 @@ app.route('/auth')
     const user = users.find((user) => user.email === req.body.email);
 
     if (user === undefined) {
-      res.redirect('/register');
+      return res.redirect('/register');
     }
 
     bcrypt.compare(req.body.password, user.password, (err, result) => {
@@ -71,12 +73,16 @@ app.route('/register')
 
       const token = generateToken({ email: req.body.email });
 
-      users.push({
+      const user = {
         email: req.body.email,
         password: hash,
         isConfirmed: false,
         uuid,
-      })
+      };
+
+      users.push(user);
+
+      sendConfirmationEmail(user.email, user.uuid);
 
       res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
       res.redirect('/');
