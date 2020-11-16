@@ -1,19 +1,42 @@
 extends layout
 
 block content
-  div
-    span
-      b Email:&nbsp;
-    span= email
+  style(type="text/css").
+    .wrapper {
+      text-align: center;
+    }
 
-    br
+    h1 {
+      margin-bottom: 30px;
+    }
 
-    span
-      b isConfirmed:&nbsp;
-    if isConfirmed
-      span true
-    else
-      span false
+    .text {
+      text-align: left;
+    }
 
-  a(href="/logout") Log Out
+    a {
+      width:100%;
+      display:block;
+      text-align:center;
+      margin:10px;
+    }
+
+  .row.justify-content-center
+    .wrapper
+      h1= pageTitle
+      .text
+        span
+          b Email:&nbsp;
+        span= email
+
+        br
+
+        span
+          b isConfirmed:&nbsp;
+        if isConfirmed
+          span true
+        else
+          span false
+
+      a(href="/logout") Log Out
 

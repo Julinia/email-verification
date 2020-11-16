@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  style(type="text/css").
+    .wrapper {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input {
+      margin: 5px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+  .row.justify-content-center
+    .wrapper
+      h1= pageTitle
+      form(action=path, method="post")
+        input(type="email", name="email")
+        input(type="password", name="password")
+        input(type="submit", value=text)
+      a(href=altPath)= altText

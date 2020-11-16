@@ -1,9 +1,0 @@
-extends layout
-
-block content
-  .row
-    form(action="/auth", method="post")
-      input(type="email", name="email")
-      input(type="password", name="password")
-      input(type="submit", value="Log In")
-    a(href="/register") Register

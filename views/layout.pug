@@ -4,7 +4,13 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css')
 
+    style(type="text/css").
+      body {
+        font-size: 1.2em;
+        padding: 25px;
+      }
+
     title= pageTitle
   body
-    .container(style="text-align: center;")
+    .container
       block content
