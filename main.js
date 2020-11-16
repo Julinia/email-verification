@@ -35,7 +35,15 @@ app.get('/', (req, res) => {
     return res.redirect('/auth');
   }
 
-  res.render('index', user);
+  res.render('index', {
+    pageTitle: 'Main Page',
+    ...user
+  });
+});
+
+app.get('/logout', (req, res) => {
+  res.cookie('jwtToken', '', { maxAge: 1800000, httpOnly: true });
+  res.redirect('/');res.cookie('jwtToken', '', { maxAge: 1800000, httpOnly: true });
 });
 
 app.route('/auth')

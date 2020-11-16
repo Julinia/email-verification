@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const authGuard = (req, res, next) => {
   const token = req.cookies.jwtToken;
 
-  if (token === undefined) {
+  if (token === undefined || token === '') {
     req.user = undefined;
     return next();
   }
