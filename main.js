@@ -48,38 +48,49 @@ app.get('/logout', (req, res) => {
 
 app.route('/auth')
   .get((req, res) => {
-    res.render('login', { pageTitle: 'Log In Page' })
+    res.render('form', {
+      pageTitle: 'Log In Page',
+      path: '/auth',
+      altPath: '/register',
+      text: 'Log In',
+      altText: 'Register',
+    });
   })
   .post((req, res) => {
     const user = users.find((user) => user.email === req.body.email);
 
     if (user === undefined) {
-      return res.redirect('/register');
+      return res.redirect('/auth');
     }
 
     bcrypt.compare(req.body.password, user.password, (err, result) => {
       if (err) console.error(err);
-      if (result == true) {
+      if (result === true) {
         const token = generateToken({ email: user.email });
 
         res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
         res.redirect('/');
+      } else if (result === false) {
+        res.redirect('/auth');
       }
     });
   });
 
 app.route('/register')
   .get((req, res) => {
-
-    res.render('register', { pageTitle: 'Register Page' })
+    res.render('form', {
+      pageTitle: 'Register Page',
+      path: '/register',
+      altPath: '/auth',
+      text: 'Register',
+      altText: 'Log In',
+    })
   })
   .post((req, res) => {
     bcrypt.hash(req.body.password, 10, (err, hash) => {
       if (err) console.error(err);
 
       const uuid = uuidv4();
-
-      const token = generateToken({ email: req.body.email });
 
       const user = {
         email: req.body.email,
@@ -92,8 +103,7 @@ app.route('/register')
 
       sendConfirmationEmail(user.email, user.uuid);
 
-      res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
-      res.redirect('/');
+      res.redirect('/auth');
     });
   });
 
