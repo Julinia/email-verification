@@ -1,33 +1,99 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
+const { authGuard, generateToken } = require('./authentication');
+
 const app = express();
 require('dotenv').config();
-
-const { authGuard } = require('./authentication');
 
 app.set('view engine', 'pug')
 
 app.use(cookieParser());
-app.use(bodyParser.urlencoded())
+app.use(bodyParser.urlencoded({ extended: true }))
+
+app.use(authGuard);
 
 app.listen(3000, () => {
   console.log('Listening on port 3000');
 })
 
-app.get('/', authGuard, (req, res) => {
+const users = [];
 
-  res.send('Main Page');
+app.get('/', (req, res) => {
+  if (!req.user) {
+    return res.redirect('/auth');
+  }
+
+  const user = users.find((user) => user.email === req.user.email);
+
+  if (user === undefined) {
+    res.cookie('jwtToken', '', { maxAge: 1800000, httpOnly: true });
+    return res.redirect('/auth');
+  }
+
+  res.render('index', user);
 });
 
+app.route('/auth')
+  .get((req, res) => {
+    res.render('login', { pageTitle: 'Log In Page' })
+  })
+  .post((req, res) => {
+    const user = users.find((user) => user.email === req.body.email);
 
-app.get('/auth', (req, res) => {
+    if (user === undefined) {
+      res.redirect('/register');
+    }
 
-  res.send('Auth Page');
-});
+    bcrypt.compare(req.body.password, user.password, (err, result) => {
+      if (err) console.error(err);
+      if (result == true) {
+        const token = generateToken({ email: user.email });
+
+        res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
+        res.redirect('/');
+      }
+    });
+  });
 
 app.route('/register')
   .get((req, res) => {
 
-    res.send('Register Page');
+    res.render('register', { pageTitle: 'Register Page' })
+  })
+  .post((req, res) => {
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+      if (err) console.error(err);
+
+      const uuid = uuidv4();
+
+      const token = generateToken({ email: req.body.email });
+
+      users.push({
+        email: req.body.email,
+        password: hash,
+        isConfirmed: false,
+        uuid,
+      })
+
+      res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
+      res.redirect('/');
+    });
   });
+
+app.get('/confirm/:uuid', (req, res) => {
+  const uuid = req.params.uuid;
+
+  const userIndex = users.findIndex((user) => user.uuid === uuid);
+
+  if (userIndex === -1) {
+    return res.redirect('/');
+  }
+
+  users[userIndex].isConfirmed = true;
+  users[userIndex].uuid = null;
+
+  res.redirect('/');
+});

@@ -4,19 +4,19 @@ const authGuard = (req, res, next) => {
   const token = req.cookies.jwtToken;
 
   if (token === undefined) {
-    return res.redirect('/auth');
+    req.user = undefined;
+    return next();
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    console.log(err)
-    if (err) return res.redirect('/auth');
-    req.user = user
-    next()
+    if (err) console.error(err);
+    req.user = user;
+    next();
   });
 }
 
-const generateToken = (email) => {
-  return jwt.sign(email, process.env.JWT_SECRET, { expiresIn: '1800s' });
+const generateToken = (user) => {
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30m' });
 }
 
 module.exports = { authGuard, generateToken };

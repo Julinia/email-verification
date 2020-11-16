@@ -1,9 +1,23 @@
-html(lang="en")
-  head
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Sign-In Laboratory
-  body
-    .container
-      h1= page
-      p= content
+extends layout
+
+block content
+  div
+    span
+      b uuid:&nbsp;
+    span= uuid
+
+    br
+
+    span
+      b Email:&nbsp;
+    span= email
+
+    br
+
+    span
+      b isConfirmed:&nbsp;
+    if isConfirmed
+      span true
+    else
+      span false
+
