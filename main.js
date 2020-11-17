@@ -43,7 +43,7 @@ app.get('/', (req, res) => {
 
 app.get('/logout', (req, res) => {
   res.cookie('jwtToken', '', { maxAge: 1800000, httpOnly: true });
-  res.redirect('/');res.cookie('jwtToken', '', { maxAge: 1800000, httpOnly: true });
+  res.redirect('/');
 });
 
 app.route('/auth')
