@@ -3,9 +3,12 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
+const csrf = require('csurf')
 const { v4: uuidv4 } = require('uuid');
 const { authGuard, generateToken } = require('./authentication');
 const { initSender, sendConfirmationEmail } = require('./email')
+
+const csrfProtection = csrf({ cookie: true })
 
 const app = express();
 require('dotenv').config();
@@ -26,7 +29,7 @@ app.listen(process.env.SERVER_PORT, () => {
 const users = [];
 const actions = [];
 
-app.get('/', (req, res) => {
+app.get('/', csrfProtection, (req, res) => {
   if (!req.user) {
     return res.redirect('/auth');
   }
@@ -42,10 +45,23 @@ app.get('/', (req, res) => {
     pageTitle: 'Main Page',
     ...user,
     actions,
+    csrfToken: req.csrfToken()
   });
 });
 
-app.post('/makeaction', (req, res) => {
+app.post('/makeaction',
+  csrfProtection,
+  (err, req, res, next) => {
+    if (err.code !== 'EBADCSRFTOKEN') return next(err)
+    res.render('form', {
+      pageTitle: 'Log In Page. You are here cause your CSRF token is invalid (-_-)',
+      path: '/auth',
+      altPath: '/register',
+      text: 'Log In',
+      altText: 'Register',
+    });
+  },
+  (req, res) => {
   if (!req.user) {
     return res.redirect('/auth');
   }
@@ -120,7 +136,10 @@ app.route('/register')
 
       sendConfirmationEmail(user.email, user.uuid);
 
-      res.redirect('/auth');
+      const token = generateToken({ email: user.email });
+      res.cookie('jwtToken', token, { maxAge: 1800000, httpOnly: true });
+
+      res.redirect('/');
     });
   });
 
