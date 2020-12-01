@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
 const { v4: uuidv4 } = require('uuid');
 const { authGuard, generateToken } = require('./authentication');
 const { initSender, sendConfirmationEmail } = require('./email')
@@ -13,6 +14,7 @@ app.set('view engine', 'pug')
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(helmet());
 
 app.use(authGuard);
 
