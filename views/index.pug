@@ -21,6 +21,10 @@ block content
       margin:10px;
     }
 
+    .actions {
+      text-align: left;
+    }
+
   .row.justify-content-center
     .wrapper
       h1= pageTitle
@@ -39,4 +43,19 @@ block content
           span false
 
       a(href="/logout") Log Out
+
+      .form
+        form(action="/makeaction", method="post")
+          input(type="text", name="value")
+          input(type="submit", value="Action")
+
+      .row.justify-content-left
+        .actions
+          div
+          each val in actions
+            div
+              span
+                b= val.user
+              span :&nbsp;
+              span= val.value
 

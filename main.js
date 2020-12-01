@@ -24,6 +24,7 @@ app.listen(process.env.SERVER_PORT, () => {
 })
 
 const users = [];
+const actions = [];
 
 app.get('/', (req, res) => {
   if (!req.user) {
@@ -39,8 +40,22 @@ app.get('/', (req, res) => {
 
   res.render('index', {
     pageTitle: 'Main Page',
-    ...user
+    ...user,
+    actions,
   });
+});
+
+app.post('/makeaction', (req, res) => {
+  if (!req.user) {
+    return res.redirect('/auth');
+  }
+
+  actions.push({
+    user: req.user.email,
+    value: req.body.value
+  });
+
+  res.redirect('/');
 });
 
 app.get('/logout', (req, res) => {
